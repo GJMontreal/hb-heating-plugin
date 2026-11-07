@@ -7,10 +7,10 @@
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
-    "url": "git://github.com/GJMontreal/heating.git"
+    "url": "git://github.com/GJMontreal/hb-heating-plugin.git"
   },
   "bugs": {
-    "url": "https://github.com/GJMontreal/heating/issues"
+    "url": "https://github.com/GJMontreal/hb-heating-plugin/issues"
   },
   "engines": {
     "node": ">=10.17.0",
