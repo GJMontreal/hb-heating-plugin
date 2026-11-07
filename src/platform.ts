@@ -3,6 +3,7 @@ import { API, DynamicPlatformPlugin, Logger, PlatformAccessory, PlatformConfig, 
 import { PLATFORM_NAME, PLUGIN_NAME } from './settings';
 import { ThermostatAccessory } from './thermostatAccessory';
 import { RedisConfig, ThermostatConfig} from './config';
+import { publishVersion } from './versionKey';
 
 // import { platform } from 'os';
 // import { format } from 'path';
@@ -38,6 +39,7 @@ export class HydronicHeating implements DynamicPlatformPlugin {
         log.info('Plugin configuration incomplete');
         return;
       }
+      publishVersion(this.config.redis as RedisConfig, log);
       // run the method to discover / register your devices as accessories
       this.discoverDevices(this.config.thermostats as [ThermostatConfig], this.config.redis as RedisConfig);
     });
