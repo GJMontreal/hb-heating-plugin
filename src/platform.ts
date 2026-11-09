@@ -3,6 +3,7 @@ import { API, DynamicPlatformPlugin, Logger, PlatformAccessory, PlatformConfig, 
 import { PLATFORM_NAME, PLUGIN_NAME } from './settings';
 import { ThermostatAccessory } from './thermostatAccessory';
 import { RedisConfig, ThermostatConfig} from './config';
+import { resolveBoostMinutes } from './boost';
 import { publishVersion } from './versionKey';
 
 // import { platform } from 'os';
@@ -68,6 +69,7 @@ export class HydronicHeating implements DynamicPlatformPlugin {
     thermostats.forEach(thermostatConfig =>{
       
       const uuid = this.api.hap.uuid.generate(thermostatConfig?.path);
+      const boostMinutes = resolveBoostMinutes(thermostatConfig, this.config.boostMinutes, this.log);
 
       // see if an accessory with the same uuid has already been registered and restored from
       // the cached devices we stored in the `configureAccessory` method above
@@ -84,7 +86,7 @@ export class HydronicHeating implements DynamicPlatformPlugin {
 
         // create the accessory handler for the restored accessory
         // this is imported from `platformAccessory.ts`
-        new ThermostatAccessory(this, existingAccessory, this.log, redisConfig);
+        new ThermostatAccessory(this, existingAccessory, this.log, redisConfig, boostMinutes);
           
         // update accessory cache with any changes to the accessory details and information
         this.api.updatePlatformAccessories([existingAccessory]);
@@ -103,7 +105,7 @@ export class HydronicHeating implements DynamicPlatformPlugin {
         // store a copy of the device object in the `accessory.context`
         // the `context` property can be used to store any data about the accessory you may need
         accessory.context.device = thermostatConfig;
-        new ThermostatAccessory(this, accessory, this.log, redisConfig);
+        new ThermostatAccessory(this, accessory, this.log, redisConfig, boostMinutes);
 
         // link the accessory to your platform
         this.api.registerPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [accessory]);

@@ -29,6 +29,14 @@
         }
         }
     },
+    "boostMinutes": {
+      "title": "Boost Minutes",
+      "type": "integer",
+      "default": 60,
+      "minimum": 5,
+      "maximum": 240,
+      "description": "How long the Boost switch stays on before it turns itself off."
+    },
     "thermostats": {
       "type": "array",
       "items": {
@@ -47,6 +55,13 @@
             "placeholer": "Enter sensor path...",
             "default": "/home/sensors/ABCD1234",
             "required": true
+          },
+          "boostMinutes": {
+            "title": "Boost Minutes",
+            "type": "integer",
+            "minimum": 5,
+            "maximum": 240,
+            "description": "Overrides the platform value for this thermostat."
           }
         }
       }
@@ -56,8 +71,8 @@
     "name",
     "redis",
     "redis.host",
-    "redis.port"
-    ,
+    "redis.port",
+    "boostMinutes",
     {
       "key": "thermostats",
       "type": "array",
@@ -65,7 +80,8 @@
       "buttonText": "Add Thermostat",
       "items" : [
         "thermostats[].name",
-        "thermostats[].path"
+        "thermostats[].path",
+        "thermostats[].boostMinutes"
       ]
     }
   ]

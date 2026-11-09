@@ -4,6 +4,7 @@ import { HydronicHeating } from './platform';
 import { RedisConfig } from './config';
 
 import { deserialize } from 'class-transformer';
+import { BoostTimer } from './boost';
 import { MessageHandler, MessageDispatcher } from './messageHandler';
 import { TemperatureMessage } from './messageTypes';
 import redis = require('redis');
@@ -23,6 +24,7 @@ export class ThermostatAccessory {
   private boostService: Service;
   private subscriber: RedisClient; 
   private client: RedisClient;
+  private boostTimer: BoostTimer;
   private states = {
     HeatingCoolingState: this.platform.Characteristic.CurrentHeatingCoolingState.OFF,
     TargetHeatingCoolingState: this.platform.Characteristic.CurrentHeatingCoolingState.OFF,
@@ -40,6 +42,7 @@ export class ThermostatAccessory {
     private readonly accessory: PlatformAccessory,
     public readonly log: Logger, 
     private readonly redisConfig: RedisConfig,
+    boostMinutes: number,
   ) {
     this.messageDispatcher = new MessageDispatcher(this.log);
     try{
@@ -99,8 +102,18 @@ export class ThermostatAccessory {
       .on('get', this.getBoostMode.bind(this))
       .on('set', this.setBoostMode.bind(this));
 
+    this.boostTimer = new BoostTimer(
+      this.client,
+      `${this.accessory.context.device.path}/boost`,
+      boostMinutes,
+      () => this.showBoostMode(false),
+      this.log,
+    );
+    this.platform.api.on('shutdown', () => this.boostTimer.dispose());
+
     this.setupRedisSubscriber(this.subscriber);
     this.getLastValues();
+    this.boostTimer.restore(on => this.showBoostMode(on));
   }
 
   getLastValues() {
@@ -289,14 +302,18 @@ export class ThermostatAccessory {
   
   setBoostMode(value: CharacteristicValue, callback: CharacteristicSetCallback) {
     this.states.BoostMode = value as boolean;
-    
-    const path = this.accessory.context.device.path;
-    const channel = `${path}/boost`;
 
-    const message = `${this.states.BoostMode}`;
-
-    this.client.set(channel, message);
+    if (this.states.BoostMode) {
+      this.boostTimer.start();
+    } else {
+      this.boostTimer.stop();
+    }
     callback(null);
+  }
+
+  showBoostMode(on: boolean) {
+    this.states.BoostMode = on;
+    this.boostService.updateCharacteristic(this.platform.Characteristic.On, on);
   }
 
   getBoostMode(callback: CharacteristicGetCallback) {
