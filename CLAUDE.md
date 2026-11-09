@@ -19,6 +19,10 @@ Homebridge platform plugin in TypeScript. It exposes each thermostat as a HomeKi
 
 Run lint, build and test before every commit.
 
+## Versions
+
+One semantic version for this plugin, in `package.json`. `src/versionKey.ts` publishes it to `heating/versions/hb-heating-plugin`. To release, bump it, commit, push, then tag the pushed commit `vX.Y.Z` with an annotated tag and push the tag. A new feature bumps the minor number.
+
 ## Rules
 
 - Redis is the contract with `boiler-relay`, `mqtt-bridge` and `heating-web`. The parent repo lists every key in `docs/redis-contract.md`. Do not rename a key or change a payload here without the matching change in the others.
